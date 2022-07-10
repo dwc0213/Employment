@@ -457,9 +457,6 @@ function charge_check() {
 				</table>
 			</div>
 				<div class="print_btn">
-				<!--
-					<a href="javascript://" onclick="window.open('/module/printSet.php?mod=1&amp;corp=document.getElementById(corp).value&worker=document.getElementById(worker).value&case01=document.getElementById(case01)value&case02=document.getElementById(case02)value&tax=document.getElementById(tax)value&duty=document.getElementById(duty)value&unemploy=document.getElementById(unemploy)value&charge=document.getElementById(charge)value&solution=document.getElementById(solution)value&samt=document.getElementById(samt)value','ieprint','width=990,height=900,scrollbars=yes','_blank')">결과물 출력</a>
-				-->
 					<a href="javascript:tmpChk();">결과물 출력</a>
 				</div>
 				<div class="ch_btn">
