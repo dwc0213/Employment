@@ -45,268 +45,185 @@ function charge_check() {
 	//form = document.frm01;
 
 	corp = 0;
-
-/*1. 첫번째 제이쿼리 라디오 선택자
-	$('.corp').each(function(){
-		c = $(this).is(":checked");
-		if(c)	corp = $(this).val();
-	});
-*/
-
-/*	2. 두번째 제이쿼리 선택자
-	if($('#corp01').is(":checked"))		corp = $('#corp01').val();
-	else if($('#corp02').is(":checked"))	corp = $('#corp02').val();
-*/
-
-//	3. 세번째 제이쿼리 선택자(이름)
-//	corp = $('input[name=corp]:checked').val();
-
-	//4. 네번쨰 제이쿼리 선택자(클래스)
-	//민간사업자, 공공기관 중 선택
 	corp = $('.corp:checked').val(); 
 	
 		alert(corp);
 	
-	//법인세율 라디오 박스 선택
 	tax = $('.tax:checked').val();
 	
 		alert(tax);
 
-	//상시 근로자의 value값 가져오기
 	var worker = $("#worker").val();
 	
-	//전체 근로자수가 1보다 작으면 mo_count의 아이디쪽으로 돌아가서 커서를 깜빡이게 해주고 alert을 띄운다.
-	// return false 모든행동을 멈춘다라는 뜻
 	if(worker<1){
 		$("#worker").focus()
 		alert("상시근로자수를 입력해주세요.");
 		return false;
 	}
 
-	//의무고용인원 (상시 근로자수 * 3.1(기업구분) / 100)
-	//parseInt 첫번째 인자를 문자열을 숫자로 변환 그값을 파싱해서 정순 NaN을 반환한다
 	var duty = Math.floor(worker * corp / 100);
-
-	//의무고용 장애인 출력
+	
 	$("#duty").text(duty);
-
-	//경증장애인
+	
 	var case01 = $("#case01").val();
 
-	//중증장애인
 	var case02 = $("#case02").val();
 	case02 = case02 * 2
 
-	//총 장애인수(중증가산)
 	var case_total = Number(case01) + Number(case02);
 
-	//총 장애인수가 의무고용인원보다 크거나 같으면 alert 경고창을 띄우고 모든행동을 멈춘다.
 	if(case_total >= duty){
 		alert("의무고용인원을 초과했습니다.");
 		return false;
 	}
 	
-	//workAccount 초기화
 	var workAccount = 0; 
 
-	//계(의무고용인원 - 중증가산인원) 이 0보다 크면 (의무고용인원 - 중증가산인원)
 	var worker_sum = Number(duty)-Number(case_total);
 	if(worker_sum > 0){
 		$("#worker_sum").val(worker_sum);
 	}
-	
-	//미고용장애인 = 의무고용의원 - 총장애인(중증가산)
+
 	var unemploy = Number(duty) - Number(case_total)
 	
-	// 고용미달 장애인 출력
 	$("#unemploy").text(unemploy); 
 
-	//workAccount(부담기초액) 변수에 총장애인근로자 / 의무고용인원
 	var workAccount = case_total / duty;
 	
-	//부담기초액 산식 'B' = 0
 	if(workAccount<=0){
 		
-		//기준금액 2021
 		var money_base = 1914440;
 
-		//법인세 = (의무고용장애인 - 총 고용장애인) * 부담기초액 * 12(1년) * 법인세율 * 1.1
-		//법인세 = (duty - case_total) * money_base) *12) * tax * 1.1
 		var corptax = (((duty - case_total) * money_base) *12) * tax * 1.1		
 		
-		//소수점 내리고 정수도 내림
 		corptax = Math.floor(corptax/10) * 10;
 		
-		//alert(corptax);
-
-		//장애인 고용부담금 = 의무고용장애인 - 총고용장애인 * 부담기초액 *12
 		var emp_amount = (((duty - case_total) * money_base) * 12);
 
-		// 장애인 고용부담금(연) = 법인세 + 장애인 고용부담금
 		var charge = corptax + emp_amount;
 		$("#charge").text(charge);
 		
-		//솔루션 도입비용 = 고용미달 장애인수 ÷ 2 * 2,500,000원
 		var solution = Math.ceil(unemploy / 2) * 2500000	
 		
 		$("#solution").text(solution);
 		
-		//장애인고용부담금 절감금액 = 장애인 고용부담금(연) - 솔루션 도입비용
 		var samt = charge - solution;
 		$("#samt").text(samt);
 		
 	}
 	
-	//부담기초액 산식 = 총장애인근로자 / 의무고용인원 > 0  && 총장애인근로자 / 의무고용인원 < 25% 1,608,600원
 	else if( workAccount > 0 && workAccount < 0.25 ){
 
-		//기준금액 2022
 		var money_base = 1608600;
 		
-		//법인세 = (의무고용장애인 - 총 고용장애인) * 부담기초액 * 12(1년) * 법인세율 * 1.1
-		//법인세 = (duty - case_total) * money_base) *12) * tax * 1.1
 		var corptax = (((duty - case_total) * money_base) *12) * tax * 1.1
 		
-		//소수점 내리고 정수도 내림
 		corptax = Math.floor(corptax/10) * 10;
 
-		//장애인 고용부담금 = 의무고용장애인 - 총고용장애인 * 부담기초액 *12
 		var emp_amount = (((duty - case_total) * money_base) * 12);
 
-		// 장애인 고용부담금(연) = 법인세 + 장애인 고용부담금
 		var charge = corptax + emp_amount;
 		$("#charge").text(charge);
 		
-		//솔루션 도입비용 = 고용미달 장애인수 ÷ 2 * 2,500,000원
 		var solution = Math.ceil(unemploy / 2) * 2500000	
 
 		$("#solution").text(solution);
 		
-		//장애인고용부담금 절감금액 = 장애인 고용부담금(연) - 솔루션 도입비용
 		var samt = charge - solution;
 		$("#samt").text(samt);
 
 	}
-
-	//부담기초액 산식 총장애인근로자 / 의무고용인원 >= 25% && 총장애인근로자 / 의무고용인원 < 50% 1,378,800원
+	
 	else if( workAccount >= 0.25 && workAccount < 0.50 ){
 		
-		//기준금액 2022
 		var money_base = 1378800;
 			
-		//법인세 = (의무고용장애인 - 총 고용장애인) * 부담기초액 * 12(1년) * 법인세율 * 1.1
-		//법인세 = (duty - case_total) * money_base) *12) * tax * 1.1
 		var corptax = (((duty - case_total) * money_base) *12) * tax * 1.1
 
-		//소수점 내리고 정수도 내림
 		corptax = Math.floor(corptax/10) * 10;
 
-		//장애인 고용부담금 = 의무고용장애인 - 총고용장애인 * 부담기초액 *12
 		var emp_amount = (((duty - case_total) * money_base) * 12);
 
-		// 장애인 고용부담금(연) = 법인세 + 장애인 고용부담금
 		var charge = corptax + emp_amount;
 		$("#charge").text(charge);
 		
-		//솔루션 도입비용 = 고용미달 장애인수 ÷ 2 * 2,500,000원
 		var solution = Math.ceil(unemploy / 2) * 2500000				
 		$("#solution").text(solution);
 		
-		//장애인고용부담금 절감금액 = 장애인 고용부담금(연) - 솔루션 도입비용
 		var samt = charge - solution;
 		$("#samt").text(samt);
 
 	}
 
-	//부담기초액 산식 의무고용인원/장애인근로자수 >= 50% && 의무고용인원/장애인근로자수 < 75% 1,217,490원
 	else if( workAccount >= 0.50 && workAccount < 0.75 ){
 		
-		//기준금액 2022
 		var money_base = 1217490;
 
-		//법인세 = (의무고용장애인 - 총 고용장애인) * 부담기초액 * 12(1년) * 법인세율 * 1.1
-		//법인세 = (duty - case_total) * money_base) *12) * tax * 1.1
 		var corptax = (((duty - case_total) * money_base) *12) * tax * 1.1
 
-		//소수점 내리고 정수도 내림
 		corptax = Math.floor(corptax/10) * 10;
 
-		//장애인 고용부담금 = 의무고용장애인 - 총고용장애인 * 부담기초액 *12
 		var emp_amount = (((duty - case_total) * money_base) * 12);
 
-		// 장애인 고용부담금(연) = 법인세 + 장애인 고용부담금
 		var charge = corptax + emp_amount;
 		$("#charge").text(charge);
 		
-		//솔루션 도입비용 = 고용미달 장애인수 ÷ 2 * 2,500,000원
 		var solution = Math.ceil(unemploy / 2) * 2500000			
 		$("#solution").text(solution);
 		
-		//장애인고용부담금 절감금액 = 장애인 고용부담금(연) - 솔루션 도입비용
 		var samt = charge - solution;
 		$("#samt").text(samt);
 
 	}
 			
-	//부담기초액 산식 의무고용인원/장애인근로자수
 	else if(workAccount < 0.75){
 				
-		//기준금액 2022
 		var money_base = 1149000;
 
-		//법인세 = (의무고용장애인 - 총 고용장애인) * 부담기초액 * 12(1년) * 법인세율 * 1.1
-		//법인세 = (duty - case_total) * money_base) *12) * tax * 1.1
 		var corptax = (((duty - case_total) * money_base) *12) * tax * 1.1
 
-		//소수점 내리고 정수도 내림
 		corptax = Math.floor(corptax/10) * 10;
 
-		//장애인 고용부담금 = 의무고용장애인 - 총고용장애인 * 부담기초액 *12
 		var emp_amount = (((duty - case_total) * money_base) * 12);
 
-		// 장애인 고용부담금(연) = 법인세 + 장애인 고용부담금
 		var charge = corptax + emp_amount;
 		$("#charge").text(charge);
 		
-		//솔루션 도입비용 = 고용미달 장애인수 ÷ 2 * 2,500,000원
 		var solution = unemploy / 2 * 2500000				
 		$("#solution").text(solution);
 		
-		//장애인고용부담금 절감금액 = 장애인 고용부담금(연) - 솔루션 도입비용
 		var samt = charge - solution;
 		$("#samt").text(samt);
 
 	}else if(case_total>=duty){
 			
-				$("#charge").text("0");//연간 발생되는 장애인 고용부담금
-				$("#solution").text("0"); //솔루션 도입비용(1회성)
-				$("#samt").text("0"); // 장애인 고용부담금 절감금액
+				$("#charge").text("0");
+				$("#solution").text("0");
+				$("#samt").text("0");
 
 				$("#money_title06").val("0");
 
 	}
 
-	var duty = $("#duty").text(); //의무고용인원 문자열 출력
-	var unemploy = $("#unemploy").text(); // 고용미달장애인
-	var charge = $("#charge").text().replace(/,/g, ''); // 연간 발생되는 장애인 고용부담금
-	var solution = $("#solution").text().replace(/,/g, ''); // 솔루션 도입비용(1회성)
-	var samt = $("#samt").text().replace(/,/g, ''); // 장애인 고용부담금 절감금액
+	var duty = $("#duty").text();
+	var unemploy = $("#unemploy").text();
+	var charge = $("#charge").text().replace(/,/g, '');
+	var solution = $("#solution").text().replace(/,/g, '');
+	var samt = $("#samt").text().replace(/,/g, '');
 
 		Number.prototype.cf=function(){
 		
-			var a=this.toString().split("."); //. 으로 String객체를 문자열로 나누고
-			a[0]=a[0].replace(/\B(?=(\d{3})+(?!\d))/g,","); // 정규식으로 문자열 반환해서 콤마로 변경하고
-			return a.join(".") // 마지막에 다시 .붙이고 
-		
+			var a=this.toString().split(".");
+			a[0]=a[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");
+			return a.join(".");
 		};
 
-		num_count(duty, $("#duty")); // 의무 고용인원
-		num_count(unemploy, $("#unemploy")); //미달 고용 장애인
-		num_count(charge, $("#charge")); // 연갈 발생되는 장애인 고용부담금
-		num_count(solution, $("#solution")); // 솔루션 도입비용(1회성)
-		num_count(samt, $("#samt")); // 장애인 고용부담금 절감금액
+		num_count(duty, $("#duty")); 
+		num_count(unemploy, $("#unemploy")); 
+		num_count(charge, $("#charge")); 
+		num_count(solution, $("#solution"));
+		num_count(samt, $("#samt"));
 
-		//애니메이션 효과주기 animate
 		function num_count(wcnt, obj){
 			$({ val : 0 }).animate({ val : wcnt }, {
 				duration: 500,
@@ -322,10 +239,6 @@ function charge_check() {
 }
 
 </script>
-
-
-
-
 
 <style>
 @page {
@@ -453,119 +366,16 @@ function charge_check() {
 						<tr>
 							<th colspan="2" style="border-right: 1px solid #ddd;">법인세율</th>
 							<td>
-								<input id="perc01" name="tax" id="tax01" type="text" class="tax" value="<?=$tax?>" style="text-align:right;">%<!-- <label for="perc01">10%</label> -->
-								<!-- <input id="perc02" name="tax" id="tax02" type="radio" class="tax" value="<?=$tax?>"><label for="perc02">20%</label>
-								------------최초 22%에 checked 되어있어야 함---------
-								<input id="perc03" name="tax" id="tax03" type="radio"  class="tax" value="<?=$tax?>"><label for="perc03">22%</label>
-								<input id="perc04" name="tax" id="tax04" type="radio" class="tax" value="<?=$tax?>"><label for="perc04">25%</label> -->
+								<input id="perc01" name="tax" id="tax01" type="text" class="tax" value="<?=$tax?>" style="text-align:right;">%
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
-
-			<!--------------------=========여기서부터 뺀거..===========---------------------->
-
-<!-- 			<div class="pec_chart_chk">
-				[ 의무고용률, 부담기초액, 법인세율 상세보기 ] 
-							</div>
-				
-							<div class="chart_wrap">
-				<div class="chart">
-					<p>※ 의무고용률</p>
-					<table class="tbl2">
-						<tbody>
-							<tr>
-								<th colspan="2">구분</th>
-								<th style="border-right: none;">2022년</th>
-							</tr>
-							<tr>
-								<td rowspan="2" style="border-right: 1px solid #ddd;">국가 및 지자체</td>
-								<td style="border-right: 1px solid #ddd;">공무원</td>
-								<td>3.6%</td>
-							</tr>
-							<tr>
-								<td style="border-right: 1px solid #ddd;">비공무원</td>
-								<td>3.6%</td>
-							</tr>
-							<tr>
-								<td colspan="2" style="border-right: 1px solid #ddd;">공공기관</td>
-								<td>3.6%</td>
-							</tr>
-							<tr>
-								<td colspan="2" style="border-right: 1px solid #ddd;">민간기업</td>
-								<td>3.1%</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				
-				<div class="chart">
-					<p>※ 부담기초액</p>
-					<table class="tbl2">
-						<tbody>
-							<tr>
-								<th rowspan="2">구분</th>
-								<th colspan="5" style="border-right: none;">장애인 고용의무인원 대비 고용하고 있는 장애인 근로자 비율</th>
-							</tr>
-							<tr>
-								<th>3/4이상</th>
-								<th>1/2이상<br>3/4미만</th>
-								<th>1/4이상<br>1/2미만</th>
-								<th>1/4미만</th>
-								<th style="border-right: none;">미고용</th>
-							</tr>
-							<tr>
-								<td style="border-right: 1px solid #ddd;">2022년 적용</td>
-								<td style="border-right: 1px solid #ddd;">1,149,000원</td>
-								<td style="border-right: 1px solid #ddd;">1,217,940원</td>
-								<td style="border-right: 1px solid #ddd;">1,378,800원</td>
-								<td style="border-right: 1px solid #ddd;">1,608,600원</td>
-								<td>1,914,440원</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				
-				<div class="chart">
-					<p>※ 2022년 법인세율</p>
-					<table class="tbl2">
-						<tbody>
-							<tr>
-								<th>과세표준</th>
-								<th style="border-right: none;">세율</th>
-							</tr>
-							<tr>
-								<td style="border-right: 1px solid #ddd;">2억원 이하</td>
-								<td>10%</td>
-							</tr>
-							<tr>
-								<td style="border-right: 1px solid #ddd;">2억원 초과 ~ 200억원 이하</td>
-								<td>20%</td>
-							</tr>
-							<tr>
-								<td style="border-right: 1px solid #ddd;">200억원 초과 ~ 3,000억원 이하</td>
-								<td>22%</td>
-							</tr>
-							<tr>
-								<td style="border-right: 1px solid #ddd;">3,000억원 초과</td>
-								<td>25%</td>
-							</tr>
-						</tbody>
-					</table>
-				</div> -->
-
-
-			<!--------------------=========여기서까지 뺀거..===========---------------------->
-
-				<div class="chart_detail">
-					<p style="margin-bottom:10px;">* 위 세율을 적용하여 산출된 세액에 10%의 지방세가 가산됨</p>
-					<p>* 장애인고용부담금은 세법상 손금불산입에 해당되어 발생하는 세금임</p>
-				</div>
-				
-				<!-- <div class="fold_btn">접기</div> -->
+			<div class="chart_detail">
+				<p style="margin-bottom:10px;">* 위 세율을 적용하여 산출된 세액에 10%의 지방세가 가산됨</p>
+				<p>* 장애인고용부담금은 세법상 손금불산입에 해당되어 발생하는 세금임</p>
 			</div>
-
 			<div class="calcu_result">
 				<table class="tbl2">
 					<colgroup>
